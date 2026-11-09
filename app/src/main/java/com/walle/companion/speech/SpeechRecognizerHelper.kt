@@ -77,6 +77,10 @@ class SpeechRecognizerHelper(
         override fun onPartialResults(partialResults: Bundle?) {}
     }
 
+    fun isAvailable(): Boolean {
+        return SpeechRecognizer.isRecognitionAvailable(context) && speechRecognizer != null
+    }
+
     fun startListening() {
         if (speechRecognizer == null) {
             initRecognizer()

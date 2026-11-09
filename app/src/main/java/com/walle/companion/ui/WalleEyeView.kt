@@ -8,7 +8,6 @@ import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Path
-import android.graphics.RectF
 import android.graphics.Shader
 import android.os.Handler
 import android.os.Looper
@@ -59,17 +58,17 @@ class WalleEyeView @JvmOverloads constructor(
     private var rightSlantTopInner = 0f
     private var rightSlantTopOuter = 0f
 
-    // Bottom cutout progress for Happy / Squint (0.0 = flat bottom, 1.0 = deep smile arch)
+    // Bottom cutout progress for Happy / Squint
     private var happyArchProgress = 0f
 
-    // Sleepy droop progress (0.0 = wide open, 1.0 = fully closed slit)
+    // Sleepy droop progress
     private var sleepyDroopProgress = 0f
 
     // Subtle breathing pulse
     private var breathingScale = 1.0f
     private var breathingPhase = 0.0
 
-    // Eye shift / Gaze offset (tracking tilt or looking sideways)
+    // Eye shift / Gaze offset
     private var gazeOffsetX = 0f
     private var gazeOffsetY = 0f
 
@@ -94,6 +93,19 @@ class WalleEyeView @JvmOverloads constructor(
         startBreathingLoop()
     }
 
+    fun setEyeColor(primary: Int, secondary: Int? = null) {
+        primaryEyeColor = primary
+        secondaryEyeColor = secondary ?: run {
+            val r = (Color.red(primary) * 0.8f).toInt()
+            val g = (Color.green(primary) * 0.8f).toInt()
+            val b = (Color.blue(primary) * 0.8f).toInt()
+            Color.rgb(r, g, b)
+        }
+        invalidate()
+    }
+
+    fun getPrimaryColor(): Int = primaryEyeColor
+
     fun setExpression(expression: WalleExpression, animate: Boolean = true) {
         currentExpression = expression
         if (!animate) {
@@ -117,120 +129,184 @@ class WalleEyeView @JvmOverloads constructor(
 
     private fun applyExpressionTarget(expr: WalleExpression) {
         val h = if (height > 0) height.toFloat() else 300f
+        val w = if (width > 0) width.toFloat() else 600f
         val slantBase = h * 0.08f
+
+        // Reset gazes
+        gazeOffsetX = 0f
+        gazeOffsetY = 0f
 
         when (expr) {
             WalleExpression.IDLE -> {
-                // Resting cute Cozmo slant: tops slant inward slightly
                 leftSlantTopOuter = -slantBase * 0.35f
                 leftSlantTopInner = slantBase * 0.35f
                 rightSlantTopInner = slantBase * 0.35f
                 rightSlantTopOuter = -slantBase * 0.35f
-
                 eyeScaleX = 1.0f
                 leftEyeScaleY = 1.0f
                 rightEyeScaleY = 1.0f
                 happyArchProgress = 0f
                 sleepyDroopProgress = 0f
-
-                primaryEyeColor = Color.parseColor("#00E5FF")
-                secondaryEyeColor = Color.parseColor("#00B0FF")
+            }
+            WalleExpression.LOOK_LEFT -> {
+                leftSlantTopOuter = -slantBase * 0.35f
+                leftSlantTopInner = slantBase * 0.35f
+                rightSlantTopInner = slantBase * 0.35f
+                rightSlantTopOuter = -slantBase * 0.35f
+                gazeOffsetX = -w * 0.08f
+                eyeScaleX = 0.98f
+                leftEyeScaleY = 1.0f
+                rightEyeScaleY = 1.0f
+                happyArchProgress = 0f
+                sleepyDroopProgress = 0f
+            }
+            WalleExpression.LOOK_RIGHT -> {
+                leftSlantTopOuter = -slantBase * 0.35f
+                leftSlantTopInner = slantBase * 0.35f
+                rightSlantTopInner = slantBase * 0.35f
+                rightSlantTopOuter = -slantBase * 0.35f
+                gazeOffsetX = w * 0.08f
+                eyeScaleX = 0.98f
+                leftEyeScaleY = 1.0f
+                rightEyeScaleY = 1.0f
+                happyArchProgress = 0f
+                sleepyDroopProgress = 0f
+            }
+            WalleExpression.LOOK_UP -> {
+                leftSlantTopOuter = -slantBase * 0.6f
+                leftSlantTopInner = -slantBase * 0.2f
+                rightSlantTopInner = -slantBase * 0.2f
+                rightSlantTopOuter = -slantBase * 0.6f
+                gazeOffsetY = -h * 0.09f
+                eyeScaleX = 1.05f
+                leftEyeScaleY = 1.08f
+                rightEyeScaleY = 1.08f
+                happyArchProgress = 0f
+                sleepyDroopProgress = 0f
             }
             WalleExpression.HAPPY -> {
-                // Playful tilted squint with deep upward happy bottom arch
                 leftSlantTopOuter = -slantBase * 0.5f
                 leftSlantTopInner = slantBase * 0.6f
                 rightSlantTopInner = slantBase * 0.6f
                 rightSlantTopOuter = -slantBase * 0.5f
-
                 eyeScaleX = 1.02f
                 leftEyeScaleY = 0.92f
                 rightEyeScaleY = 0.92f
-                happyArchProgress = 0.68f // Arch cuts up from bottom
+                happyArchProgress = 0.68f
                 sleepyDroopProgress = 0.1f
-
-                primaryEyeColor = Color.parseColor("#00E5FF")
-                secondaryEyeColor = Color.parseColor("#0091EA")
+            }
+            WalleExpression.LAUGHING -> {
+                leftSlantTopOuter = -slantBase * 0.7f
+                leftSlantTopInner = slantBase * 0.8f
+                rightSlantTopInner = slantBase * 0.8f
+                rightSlantTopOuter = -slantBase * 0.7f
+                eyeScaleX = 1.06f
+                leftEyeScaleY = 0.78f
+                rightEyeScaleY = 0.78f
+                happyArchProgress = 0.85f
+                sleepyDroopProgress = 0.15f
             }
             WalleExpression.CURIOUS -> {
-                // One eye raised inquisitive arch, other eye lowered
                 leftSlantTopOuter = -slantBase * 1.3f
                 leftSlantTopInner = -slantBase * 0.2f
                 rightSlantTopInner = slantBase * 0.9f
                 rightSlantTopOuter = -slantBase * 0.2f
-
                 eyeScaleX = 1.0f
                 leftEyeScaleY = 1.15f
                 rightEyeScaleY = 0.88f
                 happyArchProgress = 0f
                 sleepyDroopProgress = 0.05f
-
-                primaryEyeColor = Color.parseColor("#00E5FF")
-                secondaryEyeColor = Color.parseColor("#00B4D8")
             }
             WalleExpression.SURPRISED -> {
-                // Wide open tall circular eyes
                 leftSlantTopOuter = 0f
                 leftSlantTopInner = 0f
                 rightSlantTopInner = 0f
                 rightSlantTopOuter = 0f
-
                 eyeScaleX = 1.18f
                 leftEyeScaleY = 1.32f
                 rightEyeScaleY = 1.32f
                 happyArchProgress = 0f
                 sleepyDroopProgress = 0f
-
-                primaryEyeColor = Color.parseColor("#40C4FF")
-                secondaryEyeColor = Color.parseColor("#00E5FF")
             }
             WalleExpression.SLEEPY -> {
-                // Heavy drooping eyelids, dim amber/cyan color
                 leftSlantTopOuter = slantBase * 0.2f
                 leftSlantTopInner = slantBase * 0.2f
                 rightSlantTopInner = slantBase * 0.2f
                 rightSlantTopOuter = slantBase * 0.2f
-
                 eyeScaleX = 0.98f
                 leftEyeScaleY = 0.85f
                 rightEyeScaleY = 0.85f
                 happyArchProgress = 0f
-                sleepyDroopProgress = 0.72f // Droop covers 72%
-
-                primaryEyeColor = Color.parseColor("#00838F")
-                secondaryEyeColor = Color.parseColor("#006064")
+                sleepyDroopProgress = 0.74f
+            }
+            WalleExpression.WINK -> {
+                leftSlantTopOuter = -slantBase * 0.35f
+                leftSlantTopInner = slantBase * 0.35f
+                rightSlantTopInner = slantBase * 0.6f
+                rightSlantTopOuter = -slantBase * 0.5f
+                eyeScaleX = 1.0f
+                leftEyeScaleY = 0.06f // Closed eye wink
+                rightEyeScaleY = 1.0f
+                happyArchProgress = 0.45f
+                sleepyDroopProgress = 0f
+            }
+            WalleExpression.DIZZY -> {
+                leftSlantTopOuter = slantBase * 0.9f
+                leftSlantTopInner = -slantBase * 0.9f
+                rightSlantTopInner = slantBase * 0.9f
+                rightSlantTopOuter = -slantBase * 0.9f
+                eyeScaleX = 1.12f
+                leftEyeScaleY = 0.92f
+                rightEyeScaleY = 0.92f
+                happyArchProgress = 0.3f
+                sleepyDroopProgress = 0.2f
+            }
+            WalleExpression.ANGRY -> {
+                // Determined sharp V-eyebrows
+                leftSlantTopOuter = slantBase * 1.25f
+                leftSlantTopInner = -slantBase * 1.1f
+                rightSlantTopInner = -slantBase * 1.1f
+                rightSlantTopOuter = slantBase * 1.25f
+                eyeScaleX = 1.05f
+                leftEyeScaleY = 0.95f
+                rightEyeScaleY = 0.95f
+                happyArchProgress = 0f
+                sleepyDroopProgress = 0.28f
+            }
+            WalleExpression.LOVE -> {
+                leftSlantTopOuter = -slantBase * 0.4f
+                leftSlantTopInner = slantBase * 0.5f
+                rightSlantTopInner = slantBase * 0.5f
+                rightSlantTopOuter = -slantBase * 0.4f
+                eyeScaleX = 1.1f
+                leftEyeScaleY = 1.05f
+                rightEyeScaleY = 1.05f
+                happyArchProgress = 0.55f
+                sleepyDroopProgress = 0.05f
             }
             WalleExpression.LISTENING -> {
-                // Attentive forward lean, subtle glow
                 leftSlantTopOuter = -slantBase * 0.6f
                 leftSlantTopInner = slantBase * 0.4f
                 rightSlantTopInner = slantBase * 0.4f
                 rightSlantTopOuter = -slantBase * 0.6f
-
                 eyeScaleX = 1.05f
                 leftEyeScaleY = 1.05f
                 rightEyeScaleY = 1.05f
                 happyArchProgress = 0f
                 sleepyDroopProgress = 0f
-
-                primaryEyeColor = Color.parseColor("#00E5FF")
-                secondaryEyeColor = Color.parseColor("#18FFFF")
             }
             WalleExpression.THINKING -> {
-                // Slanted thoughtful look
                 leftSlantTopOuter = -slantBase * 0.9f
                 leftSlantTopInner = slantBase * 0.5f
                 rightSlantTopInner = -slantBase * 0.2f
                 rightSlantTopOuter = slantBase * 0.8f
-
+                gazeOffsetX = w * 0.04f
+                gazeOffsetY = -h * 0.05f
                 eyeScaleX = 0.95f
                 leftEyeScaleY = 0.95f
                 rightEyeScaleY = 0.95f
                 happyArchProgress = 0.2f
                 sleepyDroopProgress = 0.25f
-
-                primaryEyeColor = Color.parseColor("#80D8FF")
-                secondaryEyeColor = Color.parseColor("#0091EA")
             }
         }
     }
@@ -245,6 +321,8 @@ class WalleEyeView @JvmOverloads constructor(
         val sRightScaleY = rightEyeScaleY
         val sHappy = happyArchProgress
         val sSleepy = sleepyDroopProgress
+        val sGazeX = gazeOffsetX
+        val sGazeY = gazeOffsetY
 
         applyExpressionTarget(targetExpr)
 
@@ -257,9 +335,11 @@ class WalleEyeView @JvmOverloads constructor(
         val eRightScaleY = rightEyeScaleY
         val eHappy = happyArchProgress
         val eSleepy = sleepyDroopProgress
+        val eGazeX = gazeOffsetX
+        val eGazeY = gazeOffsetY
 
         ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 340
+            duration = 320
             interpolator = OvershootInterpolator(1.15f)
             addUpdateListener { va ->
                 val f = va.animatedFraction
@@ -272,6 +352,8 @@ class WalleEyeView @JvmOverloads constructor(
                 rightEyeScaleY = sRightScaleY + (eRightScaleY - sRightScaleY) * f
                 happyArchProgress = sHappy + (eHappy - sHappy) * f
                 sleepyDroopProgress = sSleepy + (eSleepy - sSleepy) * f
+                gazeOffsetX = sGazeX + (eGazeX - sGazeX) * f
+                gazeOffsetY = sGazeY + (eGazeY - sGazeY) * f
                 invalidate()
             }
             start()
@@ -279,7 +361,6 @@ class WalleEyeView @JvmOverloads constructor(
     }
 
     fun triggerTapAnimation() {
-        // Playful double wink
         val wink = ValueAnimator.ofFloat(1.0f, 0.08f, 1.0f).apply {
             duration = 180
             interpolator = AccelerateDecelerateInterpolator()
@@ -292,13 +373,49 @@ class WalleEyeView @JvmOverloads constructor(
     }
 
     private fun scheduleNextBlink() {
-        val delay = Random.nextLong(3000, 5500)
+        val delay = Random.nextLong(2800, 5200)
         mainHandler.postDelayed({
-            if (currentExpression != WalleExpression.SLEEPY && !isBlinking) {
+            if (currentExpression == WalleExpression.IDLE && !isBlinking) {
+                val dice = Random.nextInt(100)
+                when {
+                    dice < 65 -> performBlink()
+                    dice < 80 -> performSpontaneousLook()
+                    dice < 92 -> performCuriousGlance()
+                    else -> performPlayfulWink()
+                }
+            } else if (currentExpression != WalleExpression.SLEEPY && !isBlinking) {
                 performBlink()
             }
             scheduleNextBlink()
         }, delay)
+    }
+
+    private fun performSpontaneousLook() {
+        val lookExpr = if (Random.nextBoolean()) WalleExpression.LOOK_LEFT else WalleExpression.LOOK_RIGHT
+        setExpression(lookExpr)
+        mainHandler.postDelayed({
+            if (currentExpression == lookExpr) {
+                setExpression(WalleExpression.IDLE)
+            }
+        }, 1200)
+    }
+
+    private fun performCuriousGlance() {
+        setExpression(WalleExpression.CURIOUS)
+        mainHandler.postDelayed({
+            if (currentExpression == WalleExpression.CURIOUS) {
+                setExpression(WalleExpression.IDLE)
+            }
+        }, 1400)
+    }
+
+    private fun performPlayfulWink() {
+        setExpression(WalleExpression.WINK)
+        mainHandler.postDelayed({
+            if (currentExpression == WalleExpression.WINK) {
+                setExpression(WalleExpression.IDLE)
+            }
+        }, 800)
     }
 
     private fun performBlink() {
@@ -356,18 +473,15 @@ class WalleEyeView @JvmOverloads constructor(
         val h = height.toFloat()
         if (w <= 0 || h <= 0) return
 
-        // Proportions: Cozmo eyes are CHUBBY HORIZONTAL (wider than tall)
-        // Eye Width is ~30% of total width, Height is ~48% of total height
         val eyeWidth = (w * 0.31f) * eyeScaleX
         val baseEyeHeight = (h * 0.52f) * breathingScale
-        val cornerRadius = eyeWidth * 0.28f // Generously rounded organic corners
-        val eyeSpacing = w * 0.08f // Compact distance between eyes
+        val cornerRadius = eyeWidth * 0.28f
+        val eyeSpacing = w * 0.08f
 
         val centerY = (h * 0.48f) + gazeOffsetY
         val leftCenterX = (w * 0.5f) - (eyeWidth * 0.5f) - (eyeSpacing * 0.5f) + gazeOffsetX
         val rightCenterX = (w * 0.5f) + (eyeWidth * 0.5f) + (eyeSpacing * 0.5f) + gazeOffsetX
 
-        // Gradient shader for rich glowing depth
         eyePaint.shader = LinearGradient(
             0f, centerY - baseEyeHeight * 0.6f,
             0f, centerY + baseEyeHeight * 0.6f,
@@ -375,7 +489,6 @@ class WalleEyeView @JvmOverloads constructor(
             Shader.TileMode.CLAMP
         )
 
-        // Draw Left Eye
         drawOrganicEye(
             canvas = canvas,
             centerX = leftCenterX,
@@ -392,7 +505,6 @@ class WalleEyeView @JvmOverloads constructor(
             maskPath = leftMaskPath
         )
 
-        // Draw Right Eye
         drawOrganicEye(
             canvas = canvas,
             centerX = rightCenterX,
@@ -433,7 +545,6 @@ class WalleEyeView @JvmOverloads constructor(
         val top = centerY - halfH
         val bottom = centerY + halfH
 
-        // Calculate corner control coordinates with top slant
         val (topL, topR) = if (isLeft) {
             Pair(top + slantTopOuter, top + slantTopInner)
         } else {
@@ -441,30 +552,19 @@ class WalleEyeView @JvmOverloads constructor(
         }
 
         eyePath.reset()
-        // Start top-left
         eyePath.moveTo(left + cornerRadius, topL)
-        // Top edge with expressive slant
         eyePath.lineTo(right - cornerRadius, topR)
-        // Top-right corner
         eyePath.quadTo(right, topR, right, topR + cornerRadius)
-        // Right edge
         eyePath.lineTo(right, bottom - cornerRadius)
-        // Bottom-right corner
         eyePath.quadTo(right, bottom, right - cornerRadius, bottom)
-        // Bottom edge
         eyePath.lineTo(left + cornerRadius, bottom)
-        // Bottom-left corner
         eyePath.quadTo(left, bottom, left, bottom - cornerRadius)
-        // Left edge
         eyePath.lineTo(left, topL + cornerRadius)
-        // Top-left corner
         eyePath.quadTo(left, topL, left + cornerRadius, topL)
         eyePath.close()
 
-        // 1. Draw glowing eye shape
         canvas.drawPath(eyePath, eyePaint)
 
-        // 2. Apply Happy Crescent Cutout (from bottom)
         if (happyArch > 0f) {
             maskPath.reset()
             val archHeight = height * happyArch
@@ -473,14 +573,12 @@ class WalleEyeView @JvmOverloads constructor(
             maskPath.moveTo(left - 10f, bottom + 10f)
             maskPath.lineTo(right + 10f, bottom + 10f)
             maskPath.lineTo(right + 10f, archTop + (archHeight * 0.45f))
-            // Smooth bezier arch curving UP into the eye
             maskPath.quadTo(centerX, archTop - (archHeight * 0.25f), left - 10f, archTop + (archHeight * 0.45f))
             maskPath.close()
 
             canvas.drawPath(maskPath, maskPaint)
         }
 
-        // 3. Apply Sleepy Droop Cutout (from top)
         if (sleepyDroop > 0f) {
             maskPath.reset()
             val droopHeight = height * sleepyDroop

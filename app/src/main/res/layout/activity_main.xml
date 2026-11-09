@@ -6,67 +6,93 @@
     android:background="@color/oled_black"
     android:keepScreenOn="true">
 
-    <!-- Cozmo / Vector Animated Expressive Robot Eyes -->
-    <com.walle.companion.ui.WalleEyeView
-        android:id="@+id/walleEyeView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <!-- Minimalist Desk HUD Overlay (Bottom-aligned, non-intrusive) -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:paddingBottom="12dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp">
+        android:padding="8dp">
 
+        <!-- Top Half: Cozmo / Vector Animated Expressive Robot Eyes -->
+        <com.walle.companion.ui.WalleEyeView
+            android:id="@+id/walleEyeView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.4" />
+
+        <!-- Middle: AI Speech Subtitle (appears when speaking/listening) -->
         <TextView
             android:id="@+id/tvSpeechSubtitle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/walle_iris_cyan"
-            android:textSize="13sp"
+            android:textSize="14sp"
             android:fontFamily="sans-serif-medium"
             android:maxLines="2"
             android:ellipsize="end"
             android:gravity="center"
-            android:layout_marginBottom="4dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
             android:visibility="gone" />
 
+        <!-- Bottom Half: Prominent High-Visibility Digital Clock -->
+        <com.walle.companion.ui.DigitalClockView
+            android:id="@+id/digitalClockView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.0" />
+
+        <!-- Bottom Micro HUD: Status & Quick Controls -->
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:id="@+id/tvClock"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#555555"
-                android:textSize="15sp"
-                android:fontFamily="sans-serif-medium"
-                android:letterSpacing="0.05"
-                android:text="00:00" />
-
-            <View
-                android:layout_width="3dp"
-                android:layout_height="3dp"
-                android:background="#333333"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp" />
+            android:gravity="center_vertical"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="4dp">
 
             <TextView
                 android:id="@+id/tvStatus"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textColor="#444444"
-                android:textSize="12sp"
+                android:layout_weight="1"
+                android:textColor="#555555"
+                android:textSize="11sp"
                 android:fontFamily="sans-serif"
                 android:text="@string/prompt_tap_to_talk" />
+
+            <!-- Palette (Change Eye & Clock Color) -->
+            <TextView
+                android:id="@+id/btnChangeColor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#777777"
+                android:textSize="11sp"
+                android:padding="6dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="WARNA" />
+
+            <!-- Clock Style Switcher -->
+            <TextView
+                android:id="@+id/btnChangeClockStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#777777"
+                android:textSize="11sp"
+                android:padding="6dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="MODEL JAM" />
+
+            <!-- Chat / Voice Input Trigger -->
+            <TextView
+                android:id="@+id/btnQuickChat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/walle_iris_cyan"
+                android:textSize="11sp"
+                android:padding="6dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="BICARA" />
 
         </LinearLayout>
 

@@ -2,9 +2,12 @@ package com.walle.companion
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.GestureDetector
+import android.view.MotionEvent
 import android.view.View
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -22,19 +25,22 @@ import com.walle.companion.data.model.WalleExpression
 import com.walle.companion.data.preferences.AppPreferences
 import com.walle.companion.sensor.ShakeDetector
 import com.walle.companion.speech.SpeechRecognizerHelper
+import com.walle.companion.ui.DigitalClockView
 import com.walle.companion.ui.WalleEyeView
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var eyeView: WalleEyeView
-    private lateinit var tvClock: TextView
+    private lateinit var digitalClockView: DigitalClockView
     private lateinit var tvStatus: TextView
     private lateinit var tvSpeechSubtitle: TextView
     private lateinit var rootContainer: View
+
+    private lateinit var btnChangeColor: TextView
+    private lateinit var btnChangeClockStyle: TextView
+    private lateinit var btnQuickChat: TextView
 
     private lateinit var prefs: AppPreferences
     private lateinit var soundManager: SoundEffectManager
@@ -42,9 +48,20 @@ class MainActivity : AppCompatActivity() {
     private lateinit var speechHelper: SpeechRecognizerHelper
     private lateinit var shakeDetector: ShakeDetector
     private lateinit var geminiClient: GeminiClient
+    private lateinit var gestureDetector: GestureDetector
 
-    private val clockHandler = Handler(Looper.getMainLooper())
-    private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+    private val resetHandler = Handler(Looper.getMainLooper())
+
+    // Theme Color Palette
+    private val colorPalette = intArrayOf(
+        Color.parseColor("#00E5FF"), // Electric Cyan (Default)
+        Color.parseColor("#FFB300"), // Warm Amber
+        Color.parseColor("#00E676"), // Emerald Green
+        Color.parseColor("#D500F9"), // Cyber Violet
+        Color.parseColor("#FF1744"), // Ruby Red
+        Color.parseColor("#FFFFFF")  // Pure White
+    )
+    private var currentColorIndex = 0
 
     private val requestAudioPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -52,8 +69,7 @@ class MainActivity : AppCompatActivity() {
         if (isGranted) {
             startListeningFlow()
         } else {
-            Toast.makeText(this, "Izin mikrofon diperlukan untuk mendengarkan", Toast.LENGTH_SHORT).show()
-            resetToIdleState()
+            showInteractiveChatDialog(defaultPrompt = null)
         }
     }
 
@@ -66,28 +82,37 @@ class MainActivity : AppCompatActivity() {
         geminiClient = GeminiClient { prefs.geminiApiKey }
 
         initViews()
+        initGestures()
         initAudioAndSpeech()
         initSensors()
-        startClockLoop()
     }
 
     private fun initViews() {
         eyeView = findViewById(R.id.walleEyeView)
-        tvClock = findViewById(R.id.tvClock)
+        digitalClockView = findViewById(R.id.digitalClockView)
         tvStatus = findViewById(R.id.tvStatus)
         tvSpeechSubtitle = findViewById(R.id.tvSpeechSubtitle)
         rootContainer = findViewById(R.id.rootContainer)
+
+        btnChangeColor = findViewById(R.id.btnChangeColor)
+        btnChangeClockStyle = findViewById(R.id.btnChangeClockStyle)
+        btnQuickChat = findViewById(R.id.btnQuickChat)
 
         eyeView.onBlinkListener = {
             soundManager.playBlink()
         }
 
-        eyeView.onEyeInteractionListener = {
-            onScreenTapped()
+        btnChangeColor.setOnClickListener {
+            cycleColorPalette()
         }
 
-        rootContainer.setOnClickListener {
-            onScreenTapped()
+        btnChangeClockStyle.setOnClickListener {
+            digitalClockView.cycleNextStyle()
+            soundManager.playTap()
+        }
+
+        btnQuickChat.setOnClickListener {
+            onTriggerInteraction()
         }
 
         rootContainer.setOnLongClickListener {
@@ -96,10 +121,51 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun initGestures() {
+        gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
+            override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+                onTriggerInteraction()
+                return true
+            }
+
+            override fun onDoubleTap(e: MotionEvent): Boolean {
+                handleDoubleTapReaction()
+                return true
+            }
+        })
+
+        eyeView.setOnTouchListener { _, event ->
+            gestureDetector.onTouchEvent(event)
+            true
+        }
+    }
+
+    private fun cycleColorPalette() {
+        currentColorIndex = (currentColorIndex + 1) % colorPalette.size
+        val newColor = colorPalette[currentColorIndex]
+        eyeView.setEyeColor(newColor)
+        digitalClockView.setColor(newColor)
+        soundManager.playTap()
+    }
+
+    private fun handleDoubleTapReaction() {
+        soundManager.playGiggle()
+        eyeView.setExpression(WalleExpression.LAUGHING)
+        tvStatus.text = "Geli haha!"
+
+        resetHandler.postDelayed({
+            eyeView.setExpression(WalleExpression.WINK)
+            soundManager.playHappyChirp()
+        }, 600)
+
+        resetHandler.postDelayed({
+            resetToIdleState()
+        }, 1600)
+    }
+
     private fun initAudioAndSpeech() {
         ttsHelper = TextToSpeechHelper(this) { success ->
             if (success) {
-                // Initial greeting sound
                 soundManager.playHappyChirp()
             }
         }
@@ -126,7 +192,7 @@ class MainActivity : AppCompatActivity() {
 
             onSpeechResult = { recognizedText ->
                 runOnUiThread {
-                    handleUserSpeech(recognizedText)
+                    handleUserQuery(recognizedText)
                 }
             }
 
@@ -135,7 +201,7 @@ class MainActivity : AppCompatActivity() {
                     tvStatus.text = errorMsg
                     soundManager.playCuriousChirp()
                     eyeView.setExpression(WalleExpression.CURIOUS)
-                    clockHandler.postDelayed({ resetToIdleState() }, 2000)
+                    resetHandler.postDelayed({ resetToIdleState() }, 2000)
                 }
             }
         }
@@ -159,17 +225,21 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun onScreenTapped() {
+    private fun onTriggerInteraction() {
         soundManager.playTap()
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-            return
+        if (speechHelper.isAvailable()) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                requestAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                return
+            }
+            startListeningFlow()
+        } else {
+            // SpeechRecognizer unavailable on legacy/custom ROM -> Open interactive dialog
+            showInteractiveChatDialog(defaultPrompt = null)
         }
-
-        startListeningFlow()
     }
 
     private fun startListeningFlow() {
@@ -180,7 +250,56 @@ class MainActivity : AppCompatActivity() {
         speechHelper.startListening()
     }
 
-    private fun handleUserSpeech(userInput: String) {
+    private fun showInteractiveChatDialog(defaultPrompt: String?) {
+        val quickPrompts = arrayOf(
+            "Jam berapa sekarang?",
+            "Ceritakan lelucon lucu",
+            "Kamu robot apa?",
+            "Sapa aku dong!",
+            "Tidur dulu ya"
+        )
+
+        val input = EditText(this).apply {
+            hint = "Ketik pertanyaan..."
+            if (!defaultPrompt.isNullOrBlank()) {
+                setText(defaultPrompt)
+            }
+            setSingleLine(true)
+        }
+
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(40, 20, 40, 20)
+            addView(input)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Ajak Ngobrol Wall-E")
+            .setItems(quickPrompts) { _, which ->
+                val chosen = quickPrompts[which]
+                handleUserQuery(chosen)
+            }
+            .setView(container)
+            .setPositiveButton("Kirim") { _, _ ->
+                val userText = input.text.toString().trim()
+                if (userText.isNotEmpty()) {
+                    handleUserQuery(userText)
+                }
+            }
+            .setNeutralButton("Gunakan Suara") { _, _ ->
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                    != PackageManager.PERMISSION_GRANTED
+                ) {
+                    requestAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                } else {
+                    startListeningFlow()
+                }
+            }
+            .setNegativeButton("Batal", null)
+            .show()
+    }
+
+    private fun handleUserQuery(userInput: String) {
         tvSpeechSubtitle.text = "\"$userInput\""
         tvSpeechSubtitle.visibility = View.VISIBLE
         tvStatus.setText(R.string.status_thinking)
@@ -203,8 +322,11 @@ class MainActivity : AppCompatActivity() {
 
                 when (targetExpression) {
                     WalleExpression.HAPPY -> soundManager.playHappyChirp()
+                    WalleExpression.LAUGHING -> soundManager.playGiggle()
                     WalleExpression.CURIOUS -> soundManager.playCuriousChirp()
                     WalleExpression.SURPRISED -> soundManager.playSurprise()
+                    WalleExpression.DIZZY -> soundManager.playDizzy()
+                    WalleExpression.WINK -> soundManager.playHappyChirp()
                     else -> {}
                 }
 
@@ -215,16 +337,16 @@ class MainActivity : AppCompatActivity() {
                 tvStatus.text = error.message ?: "Koneksi bermasalah"
                 soundManager.playCuriousChirp()
                 eyeView.setExpression(WalleExpression.CURIOUS)
-                ttsHelper.speak("Maaf, Wall-E sedang kesulitan terhubung.")
+                ttsHelper.speak("Maaf, Wall-E kesulitan terhubung.")
             }
         }
     }
 
     private fun handleDeviceShake() {
-        soundManager.playSurprise()
-        eyeView.setExpression(WalleExpression.SURPRISED)
-        tvStatus.text = "Wah, goyang!"
-        clockHandler.postDelayed({ resetToIdleState() }, 2200)
+        soundManager.playDizzy()
+        eyeView.setExpression(WalleExpression.DIZZY)
+        tvStatus.text = "Aduh, pusing!"
+        resetHandler.postDelayed({ resetToIdleState() }, 2400)
     }
 
     private fun resetToIdleState() {
@@ -233,17 +355,6 @@ class MainActivity : AppCompatActivity() {
         eyeView.setExpression(defaultExpr)
         tvStatus.setText(R.string.prompt_tap_to_talk)
         tvSpeechSubtitle.visibility = View.GONE
-    }
-
-    private fun startClockLoop() {
-        val clockRunnable = object : Runnable {
-            override fun run() {
-                val now = Calendar.getInstance().time
-                tvClock.text = timeFormat.format(now)
-                clockHandler.postDelayed(this, 1000)
-            }
-        }
-        clockHandler.post(clockRunnable)
     }
 
     private fun showApiKeyDialog() {
@@ -287,7 +398,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        clockHandler.removeCallbacksAndMessages(null)
+        resetHandler.removeCallbacksAndMessages(null)
         shakeDetector.stop()
         speechHelper.destroy()
         ttsHelper.shutdown()

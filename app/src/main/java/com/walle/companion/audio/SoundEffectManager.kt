@@ -17,7 +17,6 @@ class SoundEffectManager(
     fun playBlink() {
         if (!isEnabledProvider()) return
         scope.launch {
-            // Short mechanical tick/chirp
             generateSweep(startFreq = 1600.0, endFreq = 2200.0, durationMs = 35, volume = 0.35f)
         }
     }
@@ -25,16 +24,24 @@ class SoundEffectManager(
     fun playHappyChirp() {
         if (!isEnabledProvider()) return
         scope.launch {
-            // Rising two-tone Wall-E happy chirp
             generateSweep(startFreq = 800.0, endFreq = 1400.0, durationMs = 80, volume = 0.5f)
             generateSweep(startFreq = 1400.0, endFreq = 2200.0, durationMs = 110, volume = 0.55f)
+        }
+    }
+
+    fun playGiggle() {
+        if (!isEnabledProvider()) return
+        scope.launch {
+            // Triple staccato high laugh chirps
+            generateSweep(startFreq = 1500.0, endFreq = 2200.0, durationMs = 50, volume = 0.5f)
+            generateSweep(startFreq = 1700.0, endFreq = 2400.0, durationMs = 50, volume = 0.55f)
+            generateSweep(startFreq = 1900.0, endFreq = 2600.0, durationMs = 60, volume = 0.55f)
         }
     }
 
     fun playCuriousChirp() {
         if (!isEnabledProvider()) return
         scope.launch {
-            // Rising inquisitive slide (question tone)
             generateSweep(startFreq = 650.0, endFreq = 1350.0, durationMs = 160, volume = 0.5f)
         }
     }
@@ -42,9 +49,17 @@ class SoundEffectManager(
     fun playSurprise() {
         if (!isEnabledProvider()) return
         scope.launch {
-            // Fast excited double squeak
             generateSweep(startFreq = 2200.0, endFreq = 1500.0, durationMs = 60, volume = 0.6f)
             generateSweep(startFreq = 1800.0, endFreq = 2600.0, durationMs = 90, volume = 0.6f)
+        }
+    }
+
+    fun playDizzy() {
+        if (!isEnabledProvider()) return
+        scope.launch {
+            // Wobbly frequency oscillation
+            generateSweep(startFreq = 1200.0, endFreq = 800.0, durationMs = 120, volume = 0.5f)
+            generateSweep(startFreq = 800.0, endFreq = 1400.0, durationMs = 120, volume = 0.5f)
         }
     }
 
@@ -69,11 +84,9 @@ class SoundEffectManager(
 
         for (i in 0 until numSamples) {
             val progress = i.toDouble() / numSamples
-            // Exponential/linear frequency sweep
             val currentFreq = startFreq + (endFreq - startFreq) * progress
             phase += 2.0 * Math.PI * currentFreq / sampleRate
 
-            // Envelope to avoid audio clicks at start and end
             val attack = (i.toDouble() / (numSamples * 0.15)).coerceAtMost(1.0)
             val decay = ((numSamples - i).toDouble() / (numSamples * 0.25)).coerceAtMost(1.0)
             val envelope = attack * decay
@@ -111,7 +124,6 @@ class SoundEffectManager(
             track.play()
             Thread.sleep(durationMs.toLong() + 20)
         } catch (_: Exception) {
-            // Ignore interruption
         } finally {
             track.release()
         }
