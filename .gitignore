@@ -9,7 +9,8 @@
 .externalNativeBuild
 .cxx
 local.properties
-scripts/
+/scripts/
+!.github/scripts/
 __pycache__/
 *.pyc
 *.apk
