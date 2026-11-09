@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Wall-E Companion</string>
+    <string name="status_ready">Standby</string>
+    <string name="status_listening">Mendengarkan...</string>
+    <string name="status_thinking">Memproses...</string>
+    <string name="status_speaking">Berbicara</string>
+    <string name="status_offline">Mode Offline</string>
+    <string name="prompt_tap_to_talk">Ketuk layar untuk berbicara</string>
+    <string name="gemini_api_key_prompt">API Key Gemini belum disetel</string>
+</resources>

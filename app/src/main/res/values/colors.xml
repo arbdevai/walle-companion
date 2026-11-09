@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- True Neutral OLED Palette -->
+    <color name="oled_black">#000000</color>
+    <color name="surface_dark">#121212</color>
+    <color name="bezel_outer">#242424</color>
+    <color name="bezel_inner">#181818</color>
+    <color name="lens_glass">#0A0A0A</color>
+
+    <!-- Wall-E Pupil / Iris Neon Glow -->
+    <color name="walle_iris_cyan">#00E5FF</color>
+    <color name="walle_iris_dim">#00838F</color>
+    <color name="walle_pupil_highlight">#FFFFFF</color>
+    <color name="walle_sleep_amber">#FFB300</color>
+
+    <!-- HUD Text -->
+    <color name="hud_text_primary">#E0E0E0</color>
+    <color name="hud_text_secondary">#808080</color>
+    <color name="hud_accent">#00E5FF</color>
+</resources>

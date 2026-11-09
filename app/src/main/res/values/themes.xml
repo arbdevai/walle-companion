@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.WalleCompanion" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="android:windowBackground">@color/oled_black</item>
+        <item name="android:statusBarColor">@color/oled_black</item>
+        <item name="android:navigationBarColor">@color/oled_black</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:keepScreenOn">true</item>
+    </style>
+</resources>

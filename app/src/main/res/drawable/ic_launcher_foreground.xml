@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Layer 1: Solid Main Housing / Body -->
+    <path
+        android:fillColor="#1E1E1E"
+        android:strokeColor="#1E1E1E"
+        android:strokeWidth="1.2"
+        android:pathData="M29,31 L79,31 A7,7 0 0,1 86,38 L86,67 A7,7 0 0,1 79,74 L29,74 A7,7 0 0,1 22,67 L22,38 A7,7 0 0,1 29,31 Z" />
+
+    <!-- Layer 2: Functional Elements / Keycaps / Visual Lines -->
+    <path
+        android:fillColor="#ECEFF4"
+        android:strokeColor="#ECEFF4"
+        android:strokeWidth="1.0"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M28.5,36 L35.5,36 A1.8,1.8 0 0,1 37.3,37.8 L37.3,42.2 A1.8,1.8 0 0,1 35.5,44 L28.5,44 A1.8,1.8 0 0,1 26.7,42.2 L26.7,37.8 A1.8,1.8 0 0,1 28.5,36 Z M41.3,36 L48.3,36 A1.8,1.8 0 0,1 50.1,37.8 L50.1,42.2 A1.8,1.8 0 0,1 48.3,44 L41.3,44 A1.8,1.8 0 0,1 39.5,42.2 L39.5,37.8 A1.8,1.8 0 0,1 41.3,36 Z M54.1,36 L61.1,36 A1.8,1.8 0 0,1 62.9,37.8 L62.9,42.2 A1.8,1.8 0 0,1 61.1,44 L54.1,44 A1.8,1.8 0 0,1 52.3,42.2 L52.3,37.8 A1.8,1.8 0 0,1 54.1,36 Z M66.9,36 L73.9,36 A1.8,1.8 0 0,1 75.7,37.8 L75.7,42.2 A1.8,1.8 0 0,1 73.9,44 L66.9,44 A1.8,1.8 0 0,1 65.1,42.2 L65.1,37.8 A1.8,1.8 0 0,1 66.9,36 Z M31.5,47 L38.5,47 A1.8,1.8 0 0,1 40.3,48.8 L40.3,53.2 A1.8,1.8 0 0,1 38.5,55 L31.5,55 A1.8,1.8 0 0,1 29.7,53.2 L29.7,48.8 A1.8,1.8 0 0,1 31.5,47 Z M44.3,47 L51.3,47 A1.8,1.8 0 0,1 53.1,48.8 L53.1,53.2 A1.8,1.8 0 0,1 51.3,55 L44.3,55 A1.8,1.8 0 0,1 42.5,53.2 L42.5,48.8 A1.8,1.8 0 0,1 44.3,47 Z M57.1,47 L64.1,47 A1.8,1.8 0 0,1 65.9,48.8 L65.9,53.2 A1.8,1.8 0 0,1 64.1,55 L57.1,55 A1.8,1.8 0 0,1 55.3,53.2 L55.3,48.8 A1.8,1.8 0 0,1 57.1,47 Z M69.9,47 L76.9,47 A1.8,1.8 0 0,1 78.7,48.8 L78.7,53.2 A1.8,1.8 0 0,1 76.9,55 L69.9,55 A1.8,1.8 0 0,1 68.1,53.2 L68.1,48.8 A1.8,1.8 0 0,1 69.9,47 Z M28.5,58 L35.5,58 A1.8,1.8 0 0,1 37.3,59.8 L37.3,65.2 A1.8,1.8 0 0,1 35.5,67 L28.5,67 A1.8,1.8 0 0,1 26.7,65.2 L26.7,59.8 A1.8,1.8 0 0,1 28.5,58 Z" />
+
+    <!-- Layer 3: Solid Accent Anchor -->
+    <path
+        android:fillColor="#38BDF8"
+        android:strokeColor="#38BDF8"
+        android:strokeWidth="1.0"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M41.5,58 L66.5,58 A2,2 0 0,1 68.5,60 L68.5,65 A2,2 0 0,1 66.5,67 L41.5,67 A2,2 0 0,1 39.5,65 L39.5,60 A2,2 0 0,1 41.5,58 Z M72.5,58 L79.5,58 A1.8,1.8 0 0,1 81.3,59.8 L81.3,65.2 A1.8,1.8 0 0,1 79.5,67 L72.5,67 A1.8,1.8 0 0,1 70.7,65.2 L70.7,59.8 A1.8,1.8 0 0,1 72.5,58 Z" />
+</vector>
