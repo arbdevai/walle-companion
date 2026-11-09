@@ -20,7 +20,7 @@ enum class WalleExpression {
     companion object {
         fun fromString(value: String): WalleExpression {
             val sanitized = value.trim().uppercase()
-            return entries.firstOrNull { it.name == sanitized } ?: IDLE
+            return values().firstOrNull { it.name == sanitized } ?: IDLE
         }
     }
 }

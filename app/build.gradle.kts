@@ -12,9 +12,9 @@ android {
         applicationId = "com.walle.companion"
         minSdk = 21
         targetSdk = 34
-        // Formula Canonical SemVer: MAJOR(1)*10000 + MINOR(2)*100 + PATCH(0)
-        versionCode = 10200
-        versionName = "1.2.0"
+        // Formula Canonical SemVer: MAJOR(1)*10000 + MINOR(2)*100 + PATCH(1)
+        versionCode = 10201
+        versionName = "1.2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

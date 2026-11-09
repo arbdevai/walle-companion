@@ -75,6 +75,17 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Global crash guard to prevent abrupt Force Close on legacy Android runtimes
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            android.util.Log.e("WalleCompanion", "Fatal crash on thread ${thread.name}", throwable)
+            try {
+                val crashFile = java.io.File(filesDir, "last_crash.log")
+                crashFile.writeText("${throwable.javaClass.name}: ${throwable.message}\n${throwable.stackTraceToString()}")
+            } catch (_: Throwable) {
+            }
+        }
+
         setContentView(R.layout.activity_main)
 
         prefs = AppPreferences(this)
@@ -85,6 +96,18 @@ class MainActivity : AppCompatActivity() {
         initGestures()
         initAudioAndSpeech()
         initSensors()
+
+        // Check if there was a previous crash to notify developer
+        try {
+            val crashFile = java.io.File(filesDir, "last_crash.log")
+            if (crashFile.exists()) {
+                val lastError = crashFile.readLines().firstOrNull().orEmpty()
+                if (lastError.isNotEmpty()) {
+                    tvStatus.text = "Info crash sebelumnya: $lastError"
+                }
+            }
+        } catch (_: Throwable) {
+        }
     }
 
     private fun initViews() {

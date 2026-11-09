@@ -92,8 +92,9 @@ class DigitalClockView @JvmOverloads constructor(
     }
 
     fun cycleNextStyle() {
-        val nextOrdinal = (currentStyle.ordinal + 1) % ClockStyle.entries.size
-        currentStyle = ClockStyle.entries[nextOrdinal]
+        val styles = ClockStyle.values()
+        val nextOrdinal = (currentStyle.ordinal + 1) % styles.size
+        currentStyle = styles[nextOrdinal]
         onClockStyleChanged?.invoke(currentStyle)
 
         // Pop bounce animation on tap

@@ -24,10 +24,14 @@ class SpeechRecognizerHelper(
     }
 
     private fun initRecognizer() {
-        if (SpeechRecognizer.isRecognitionAvailable(context)) {
-            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
-                setRecognitionListener(createListener())
+        try {
+            if (SpeechRecognizer.isRecognitionAvailable(context)) {
+                speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)?.apply {
+                    setRecognitionListener(createListener())
+                }
             }
+        } catch (_: Throwable) {
+            speechRecognizer = null
         }
     }
 
