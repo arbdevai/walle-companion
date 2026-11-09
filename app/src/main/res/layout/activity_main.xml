@@ -6,60 +6,67 @@
     android:background="@color/oled_black"
     android:keepScreenOn="true">
 
+    <!-- Cozmo / Vector Animated Expressive Robot Eyes -->
+    <com.walle.companion.ui.WalleEyeView
+        android:id="@+id/walleEyeView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Minimalist Desk HUD Overlay (Bottom-aligned, non-intrusive) -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
         android:orientation="vertical"
-        android:gravity="center"
-        android:padding="16dp">
+        android:gravity="center_horizontal"
+        android:paddingBottom="12dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
 
-        <!-- Wall-E Interactive Eye Canvas View -->
-        <com.walle.companion.ui.WalleEyeView
-            android:id="@+id/walleEyeView"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-        <!-- Desk HUD: Digital Clock & Status -->
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tvSpeechSubtitle"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center_horizontal"
-            android:layout_marginTop="8dp">
+            android:textColor="@color/walle_iris_cyan"
+            android:textSize="13sp"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:layout_marginBottom="4dp"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
             <TextView
                 android:id="@+id/tvClock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/hud_text_primary"
-                android:textSize="28sp"
+                android:textColor="#555555"
+                android:textSize="15sp"
                 android:fontFamily="sans-serif-medium"
                 android:letterSpacing="0.05"
                 android:text="00:00" />
+
+            <View
+                android:layout_width="3dp"
+                android:layout_height="3dp"
+                android:background="#333333"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp" />
 
             <TextView
                 android:id="@+id/tvStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/hud_text_secondary"
-                android:textSize="13sp"
-                android:fontFamily="sans-serif"
-                android:layout_marginTop="4dp"
-                android:text="@string/prompt_tap_to_talk" />
-
-            <TextView
-                android:id="@+id/tvSpeechSubtitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/walle_iris_cyan"
+                android:textColor="#444444"
                 android:textSize="12sp"
-                android:fontFamily="sans-serif-light"
-                android:maxLines="2"
-                android:ellipsize="end"
-                android:gravity="center"
-                android:layout_marginTop="2dp"
-                android:visibility="gone" />
+                android:fontFamily="sans-serif"
+                android:text="@string/prompt_tap_to_talk" />
 
         </LinearLayout>
 
